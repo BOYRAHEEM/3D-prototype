@@ -4,7 +4,7 @@
 
 SkyDoodle lets you draw glowing tubes in 3D space with a mouse, a finger, or a VR controller. What makes it different is a set of **assistance features** that tackle the hardest part of 3D sketching for beginners, *judging depth*, and an **adaptive helper** that switches them on when someone is struggling and fades them away as they improve. A built-in **study mode** logs every stroke so the effect of that help can be measured.
 
-> **Live demo:** `https://<your-username>.github.io/<repo-name>/` *(see [Deploying](#deploying))*
+> **Live demo:** **[boyraheem.github.io/3D-prototype](https://boyraheem.github.io/3D-prototype/)**: works in any modern browser; open it in the Meta Quest Browser and press **VR** to draw in mid-air.
 
 ![Drawing a house with depth guides: a drop line and floor shadows show where the brush is, and the glowing magnet marker on the roof shows an endpoint about to snap](docs/screenshots/depth-guides-and-snapping.jpg)
 
@@ -164,7 +164,7 @@ The repo includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) tha
 
 1. Push this project to a GitHub repository.
 2. In the repository: **Settings → Pages → Source: GitHub Actions**.
-3. Push to `main`. The site appears at `https://<user>.github.io/<repo>/` (the workflow sets the correct base path from the repo name).
+3. Push to `main`. The site appears at `https://<user>.github.io/<repo>/` (for this repo: https://boyraheem.github.io/3D-prototype/). The workflow sets the correct base path from the repo name.
 
 For Vercel/Netlify or a custom domain, build with `VITE_BASE=/ npm run build` and publish `dist/`.
 
