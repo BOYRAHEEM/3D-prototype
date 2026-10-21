@@ -1,0 +1,1330 @@
+/* ==========================================================================
+   SkyDoodle styles
+   Colours are defined once as tokens on :root and redefined for the night
+   sky, so every component themes itself automatically.
+   ========================================================================== */
+
+:root {
+  --sky-top: #8fd0ff;
+  --sky-mid: #c9ecff;
+  --sky-bottom: #fff4fb;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-solid: #ffffff;
+  --panel-border: rgba(40, 70, 140, 0.14);
+  --text: #1d2648;
+  --muted: #56608a;
+  --accent: #3a6ff7;
+  --accent-soft: rgba(58, 111, 247, 0.14);
+  --hover: rgba(58, 111, 247, 0.1);
+  --focus: #ff9f1c;
+  --good: #1f9d6a;
+  --warn: #d9480f;
+  --shadow: 0 10px 30px rgba(30, 60, 120, 0.16), 0 2px 6px rgba(30, 60, 120, 0.08);
+  --radius: 20px;
+  --tool: 56px;
+  /* Study condition colours: categorical slots 1-3 of the dataviz reference
+     palette, validated all-pairs for colour-vision deficiency on #ffffff. */
+  --c-off: #2a78d6;
+  --c-on: #eb6834;
+  --c-smart: #1baf7a;
+  --grid: #e6e8f0;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --sky-top: #070b2a;
+  --sky-mid: #18195a;
+  --sky-bottom: #3a2470;
+  --panel: rgba(24, 28, 70, 0.82);
+  --panel-solid: #1b1f4d;
+  --panel-border: rgba(170, 190, 255, 0.18);
+  --text: #eef1ff;
+  --muted: #b3bbe6;
+  --accent: #8fb0ff;
+  --accent-soft: rgba(143, 176, 255, 0.18);
+  --hover: rgba(143, 176, 255, 0.14);
+  --focus: #ffd23f;
+  --good: #5be0a5;
+  --warn: #ff9a6b;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+  /* Same hues stepped for the dark surface (#1b1f4d), validated there. */
+  --c-off: #3987e5;
+  --c-on: #d95926;
+  --c-smart: #199e70;
+  --grid: #2c3168;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--sky-mid);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The sky: a gradient behind the transparent WebGL canvas. Night adds a few stars. */
+body {
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+  transition: background 0.5s ease;
+}
+:root[data-theme='dark'] body {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 47% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 63% 12%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 78% 26%, #fffbe0 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 6%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 36% 34%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 92% 40%, #fff 50%, transparent 51%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+}
+#stage canvas {
+  display: block;
+  cursor: crosshair;
+}
+
+/* UI overlay: the container ignores the pointer so the canvas underneath gets
+   clicks; only actual panels and buttons catch them. */
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+#ui > * {
+  pointer-events: auto;
+}
+
+/* ---- Buttons --------------------------------------------------------------- */
+button {
+  font: inherit;
+  color: inherit;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.tool {
+  min-width: var(--tool);
+  min-height: var(--tool);
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.tool:hover {
+  background: var(--hover);
+}
+.tool:active {
+  transform: scale(0.94);
+}
+.tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+  background: transparent;
+}
+.tool.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tool.compact {
+  flex-direction: row;
+  gap: 8px;
+  padding: 6px 14px;
+  min-height: 48px;
+}
+.tool.wide {
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+.tool-label {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--hover);
+}
+
+.btn {
+  min-height: 48px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 2px solid var(--panel-border);
+  background: var(--panel-solid);
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s, background 0.15s;
+}
+.btn:hover {
+  background: var(--hover);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+:root[data-theme='dark'] .btn.primary {
+  color: #10153a;
+}
+
+/* ---- Docks ----------------------------------------------------------------- */
+.dock,
+.brand,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--radius);
+}
+.dock {
+  position: absolute;
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+}
+.dock hr {
+  width: 70%;
+  border: 0;
+  border-top: 1px solid var(--panel-border);
+  margin: 4px auto;
+}
+.dock-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--muted);
+  text-align: center;
+  padding: 2px 4px 6px;
+}
+
+.brand {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 10px 18px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand b {
+  color: var(--accent);
+}
+.brand-cloud {
+  font-size: 24px;
+}
+
+.top-right {
+  top: 16px;
+  right: 16px;
+  flex-direction: row;
+}
+.left {
+  left: 16px;
+  top: calc(50% + 24px); /* leave room for the logo / task bar above */
+  transform: translateY(-50%);
+  flex-direction: column;
+}
+.right {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-direction: column;
+  width: 148px;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.bottom {
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+}
+.divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--panel-border);
+}
+.swatches,
+.sizes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.swatch {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid var(--panel-solid);
+  background: var(--swatch);
+  box-shadow: 0 0 0 2px var(--panel-border);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.swatch:hover {
+  transform: translateY(-2px);
+}
+.swatch.active {
+  transform: scale(1.12) translateY(-3px);
+  box-shadow: 0 0 0 3px var(--text);
+}
+
+.size {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.size:hover {
+  background: var(--hover);
+}
+.size.active {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.size .dot {
+  border-radius: 50%;
+  background: var(--text);
+}
+.size-small .dot {
+  width: 8px;
+  height: 8px;
+}
+.size-medium .dot {
+  width: 15px;
+  height: 15px;
+}
+.size-large .dot {
+  width: 24px;
+  height: 24px;
+}
+
+/* ---- Panels (help, study, results) ------------------------------------------ */
+.panel {
+  position: absolute;
+  background: var(--panel-solid);
+  padding: 20px 24px 24px;
+}
+.panel[hidden] {
+  display: none;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.panel h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+}
+.panel h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.panel .lead {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.help {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px 28px;
+}
+.help dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  margin: 0;
+  align-items: center;
+}
+.help dt {
+  margin: 0;
+}
+.help dd {
+  margin: 0;
+  font-size: 16px;
+}
+kbd {
+  display: inline-block;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ---- Helpers panel + switches ---------------------------------------------------- */
+.assist {
+  top: 84px;
+  right: 16px;
+  width: min(400px, calc(100vw - 32px));
+  max-height: calc(100vh - 100px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.assist[hidden] {
+  display: none;
+}
+.assist-lock {
+  margin: 0 0 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+.switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.switch:hover:not(:disabled) {
+  background: var(--hover);
+}
+.switch:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.switch-track {
+  flex: none;
+  width: 52px;
+  height: 30px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: var(--panel-border);
+  position: relative;
+  transition: background 0.2s;
+}
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s;
+}
+.switch[aria-checked='true'] .switch-track {
+  background: var(--good);
+}
+.switch[aria-checked='true'] .switch-thumb {
+  transform: translateX(22px);
+}
+.switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.switch-text strong {
+  font-size: 17px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.switch-text span {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* ---- Beautify speech bubble ------------------------------------------------------ */
+.bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  max-width: min(460px, calc(100vw - 32px));
+  padding: 12px 14px 12px 16px;
+  background: var(--panel-solid);
+  border: 2px solid var(--accent);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  animation: pop 0.25s ease-out;
+}
+.bubble[hidden] {
+  display: none;
+}
+.bubble-spark {
+  font-size: 22px;
+}
+.bubble-text {
+  font-size: 18px;
+  font-weight: 800;
+}
+.bubble-actions {
+  display: flex;
+  gap: 8px;
+}
+.bubble .btn kbd {
+  margin-left: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  color: inherit;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
+}
+
+/* ---- Smart help indicator --------------------------------------------------------- */
+.adaptive {
+  position: absolute;
+  /* Above the colour palette: close to where the child is looking, and clear of the top toolbars. */
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, calc(100vw - 32px));
+  min-height: 48px;
+  padding: 8px 18px 8px 14px;
+  border: 2px solid var(--good);
+  border-radius: 999px;
+  background: var(--panel-solid);
+  box-shadow: var(--shadow);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  animation: pop 0.25s ease-out;
+}
+.adaptive[hidden] {
+  display: none;
+}
+.adaptive.expanded {
+  border-radius: 22px;
+  padding: 12px 18px 12px 14px;
+}
+.adaptive-icon {
+  font-size: 22px;
+}
+.adaptive-text {
+  line-height: 1.35;
+}
+.assist-auto {
+  margin: 0 0 4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px dashed var(--good);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+.switch.auto .switch-track {
+  outline: 2px dashed var(--good);
+  outline-offset: 2px;
+}
+
+/* ---- Forms & shared bits ---------------------------------------------------------- */
+.field-label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.text-input {
+  min-height: 48px;
+  width: 140px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+}
+.muted {
+  color: var(--muted);
+  font-size: 15px;
+}
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 4px 6px;
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 32px;
+}
+.btn.big {
+  min-height: 56px;
+  padding: 12px 26px;
+  font-size: 18px;
+}
+.btn.danger {
+  color: var(--warn);
+  border-color: currentColor;
+}
+.chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  background: var(--accent-soft);
+}
+.chip[data-cond='off'] {
+  box-shadow: inset 0 0 0 2px var(--c-off);
+}
+.chip[data-cond='on'] {
+  box-shadow: inset 0 0 0 2px var(--c-on);
+}
+.chip[data-cond='smart'] {
+  box-shadow: inset 0 0 0 2px var(--c-smart);
+}
+
+/* ---- Study setup panel ------------------------------------------------------------- */
+.study {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+.pid-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.study-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dot-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px dashed var(--panel-border);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.dot-chip.done {
+  border: 2px solid var(--good);
+  color: var(--text);
+}
+.study-suggest {
+  margin-top: 10px;
+  font-size: 16px;
+}
+.segs,
+.task-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.seg,
+.task-card {
+  min-height: 64px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 2px solid var(--panel-border);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.seg span {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.task-card {
+  align-items: center;
+  text-align: center;
+}
+.seg:hover,
+.task-card:hover {
+  background: var(--hover);
+}
+.seg[aria-pressed='true'],
+.task-card[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.task-icon {
+  width: 48px;
+  height: 48px;
+  stroke-width: 2.4;
+}
+.study-instruction {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  font-size: 16px;
+}
+.study-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* ---- Task bar (during a trial) -------------------------------------------------------- */
+.taskbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: min(520px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--panel-solid);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.taskbar[hidden],
+body.in-trial .brand {
+  display: none;
+}
+.taskbar-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+.timer {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 20px;
+}
+.taskbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.taskbar-hint {
+  flex: 1;
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.taskbar-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+/* During a trial: the left dock sits below the task bar and drops the study buttons. */
+body.in-trial .left {
+  top: 140px;
+  transform: none;
+}
+body.in-trial .study-tools {
+  display: none;
+}
+
+/* ---- Results page ------------------------------------------------------------------- */
+.results {
+  inset: 16px;
+  overflow: auto;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+.chip-btn {
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--panel-border);
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+.chip-btn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+}
+.stat-label {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+}
+.empty {
+  padding: 18px;
+  border-radius: 16px;
+  border: 2px dashed var(--panel-border);
+  font-size: 16px;
+}
+.empty p {
+  margin: 4px 0;
+}
+.legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 4px 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.swatch-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.swatch-dot[data-cond='off'] {
+  background: var(--c-off);
+}
+.swatch-dot[data-cond='on'] {
+  background: var(--c-on);
+}
+.swatch-dot[data-cond='smart'] {
+  background: var(--c-smart);
+}
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+.chart-card {
+  margin: 0;
+  padding: 12px 12px 6px;
+  border-radius: 16px;
+  border: 1px solid var(--panel-border);
+}
+.chart-card figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.chart-card figcaption span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.chart .grid {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.chart .axis {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+.chart .tick,
+.chart .xlabel {
+  fill: var(--muted);
+  /* SVG units: the chart is never drawn narrower than ~300 px, so this stays >= 14 px on screen. */
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.chart .xlabel {
+  fill: var(--text);
+  font-weight: 700;
+}
+.chart .bar {
+  opacity: 0.85;
+}
+.chart .bar[data-cond='off'],
+.chart .dot[data-cond='off'] {
+  fill: var(--c-off);
+}
+.chart .bar[data-cond='on'],
+.chart .dot[data-cond='on'] {
+  fill: var(--c-on);
+}
+.chart .bar[data-cond='smart'],
+.chart .dot[data-cond='smart'] {
+  fill: var(--c-smart);
+}
+.chart .whisker {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.chart .dot {
+  stroke: var(--panel-solid);
+  stroke-width: 2;
+}
+.chart .bar:hover,
+.chart .dot:hover {
+  opacity: 1;
+  stroke: var(--text);
+}
+.viz-tooltip {
+  position: absolute;
+  z-index: 5;
+  max-width: 280px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--text);
+  color: var(--panel-solid);
+  font-size: 14px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.viz-tooltip[hidden] {
+  display: none;
+}
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 18px;
+}
+table.summary {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+table.summary caption {
+  text-align: left;
+  font-weight: 800;
+  font-size: 17px;
+  padding-bottom: 8px;
+}
+table.summary th,
+table.summary td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--grid);
+  text-align: left;
+  vertical-align: top;
+}
+table.summary small {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+.note {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: center;
+}
+.export-row .spacer {
+  flex: 1;
+}
+
+/* ---- VR button ----------------------------------------------------------------- */
+.tool.vr-ready {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---- Onboarding ------------------------------------------------------------------- */
+.onb-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(10, 16, 50, 0.35);
+}
+.onb-overlay[hidden] {
+  display: none;
+}
+.onboarding {
+  position: relative;
+  width: min(460px, 100%);
+  text-align: center;
+  padding: 28px 28px 24px;
+  animation: pop 0.25s ease-out;
+}
+.onb-skip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.onb-art {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 8px;
+  border-radius: 28px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.onb-art .icon {
+  width: 64px;
+  height: 64px;
+  stroke-width: 2.4;
+}
+.onboarding h2 {
+  font-size: 26px;
+  margin: 8px 0 6px;
+}
+.onb-text {
+  font-size: 18px;
+  line-height: 1.45;
+  margin: 0 0 16px;
+  color: var(--text);
+}
+.onb-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.onb-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--panel-border);
+  transition: width 0.2s, background 0.2s;
+}
+.onb-dots span.on {
+  width: 28px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.onb-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.onb-actions [hidden] {
+  display: none;
+}
+.help-actions {
+  margin-top: 18px;
+}
+
+/* Visually hidden but read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* In VR the page is not visible; hide the desktop UI so it can't take focus. */
+body.in-vr #ui > :not(.toasts) {
+  visibility: hidden;
+}
+
+/* ---- Performance meter ----------------------------------------------------------- */
+.fps {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #b7ffcb;
+  font: 700 14px/1.2 ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  pointer-events: none !important;
+}
+
+/* ---- Toasts ---------------------------------------------------------------- */
+.toasts {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none !important;
+}
+.toast {
+  background: var(--text);
+  color: var(--panel-solid);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Small screens ----------------------------------------------------------- */
+/* Tablets / narrow laptops: shrink the side docks a little. */
+@media (max-width: 1000px) {
+  .right {
+    width: 132px;
+  }
+}
+
+/*
+ * Phones. There is not room for text under every button, so buttons become
+ * icon-only. They keep their full aria-label and tooltip, so screen readers
+ * still announce "Undo (Ctrl+Z)" etc. Layout:
+ *   top:    logo (left)            app buttons (right)
+ *   sides:  edit tools (left)      drawing-wall tools (right)
+ *   bottom: colours, then sizes, in two rows
+ */
+@media (max-width: 700px) {
+  :root {
+    --tool: 46px;
+  }
+  .brand {
+    top: 8px;
+    left: 8px;
+    padding: 8px 12px;
+    font-size: 18px;
+  }
+  .brand-cloud {
+    font-size: 20px;
+  }
+  .top-right {
+    top: 8px;
+    right: 8px;
+    padding: 4px;
+  }
+  .tool.compact {
+    padding: 6px 10px;
+  }
+  .top-right .tool-label,
+  .left .tool-label,
+  .right .tool-label,
+  .right .dock-title {
+    display: none;
+  }
+  .left,
+  .right,
+  body.in-trial .left {
+    top: 76px;
+    transform: none;
+    padding: 4px;
+    gap: 2px;
+  }
+  .left {
+    left: 8px;
+  }
+  .right {
+    right: 8px;
+    width: auto;
+  }
+  .right .grid2 {
+    gap: 2px;
+  }
+  .right .tool.wide {
+    width: auto;
+  }
+  .bottom {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    transform: none;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+  }
+  .bottom .divider {
+    display: none;
+  }
+  .swatches {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  /* 8 × 38 px + gaps fits a 360 px phone in one row (WCAG minimum target is 24 px). */
+  .swatch,
+  .size {
+    width: 38px;
+    height: 38px;
+    flex: none;
+  }
+  .swatch {
+    border-width: 3px;
+  }
+  .adaptive {
+    top: auto;
+    bottom: 132px;
+    font-size: 15px;
+  }
+  /* Phones: the task bar gets its own full-width row under the top toolbar. */
+  .taskbar {
+    top: 64px;
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    padding: 8px 12px;
+  }
+  .taskbar-hint {
+    display: none;
+  }
+  .taskbar-row {
+    justify-content: flex-end;
+  }
+  body.in-trial .left,
+  body.in-trial .right {
+    top: 180px;
+  }
+  .panel {
+    padding: 16px;
+  }
+  .segs,
+  .task-cards {
+    grid-template-columns: 1fr;
+  }
+  .results {
+    inset: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "skydoodle",
+  "version": "0.1.0",
+  "description": "SkyDoodle: an assisted 3D sketching tool for beginner and young creators",
+  "scripts": {
+    "dev": "vite",
+    "dev:https": "cross-env HTTPS=1 vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "cross-env": "^10.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^4.1.11"
+  },
+  "private": true
+}

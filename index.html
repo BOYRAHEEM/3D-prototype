@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="description" content="SkyDoodle: an assisted 3D sketching tool for beginner and young creators." />
+    <title>SkyDoodle</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- The 3D canvas is injected into #stage; all HTML UI lives in #ui on top of it. -->
+    <div
+      id="stage"
+      role="application"
+      aria-label="3D drawing canvas. Draw with the mouse, a finger or a VR controller. Press question mark for keyboard shortcuts."
+    ></div>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
